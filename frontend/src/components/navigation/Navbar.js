@@ -9,7 +9,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-500 p-4">
+    <nav className="bg-purple-500 p-4">
       <div className="flex justify-between items-center">
         <button onClick={toggleMenu} className="lg:hidden text-white">
           <svg
@@ -38,6 +38,10 @@ const Navbar = () => {
         </li>
         <li>
           <Link to="/events" className="text-white text-lg hover:text-gray-300">Events</Link>
+        </li>
+
+        <li>
+          <Link to="/" className="text-white text-lg hover:text-gray-300">About Us</Link>
         </li>
       </ul>
     </nav>

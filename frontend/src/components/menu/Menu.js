@@ -1,6 +1,5 @@
-// src/components/CoffeeMenu.jsx
 import React, { useEffect, useState } from 'react';
-import {supabase} from '../../lib/supabaseClient.js'
+import { supabase } from '../../lib/supabaseClient.js';
 
 function Menu() {
   const [menu, setMenu] = useState([]);
@@ -15,10 +14,11 @@ function Menu() {
 
       if (error) {
         console.error('Error fetching menu:', error.message);
-      } else {
-        setMenu(data);
+        setLoading(false);
+        return;
       }
 
+      setMenu(data);
       setLoading(false);
     };
 
@@ -34,13 +34,11 @@ function Menu() {
           key={item.id}
           className="border rounded-xl shadow-md p-4 hover:shadow-lg transition"
         >
-          {item.image_url && (
-            <img
-              src={item.image_url}
-              alt={item.name}
-              className="w-full h-40 object-cover rounded-lg mb-4"
-            />
-          )}
+          <img
+            src={item.image_url} // this should now be a full public URL
+            alt={item.name}
+            className="w-full h-40 object-cover rounded-lg mb-4"
+          />
           <h3 className="text-xl font-bold">{item.name}</h3>
           <p className="text-sm text-gray-500">{item.description}</p>
           <p className="text-lg font-semibold mt-2">${item.price.toFixed(2)}</p>
