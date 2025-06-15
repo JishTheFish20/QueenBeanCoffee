@@ -105,6 +105,11 @@ export default function Events() {
   const soonestEvent = events
     .filter(event => dayjs(event.event_time).isAfter(dayjs()))
     .sort((a, b) => dayjs(a.event_time).diff(dayjs(b.event_time)))[0];
+  
+  const upcomingEvents = events
+    .filter(e => dayjs(e.event_time).isAfter(dayjs()) 
+    && e.id !== soonestEvent?.id);
+
 
   const handleRSVPSubmit = async (email) => {
     const { error } = await supabase
@@ -121,35 +126,82 @@ export default function Events() {
   };
 
   return (
+    <div className="min-h-screen bg-stone-100">
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-4">📅 Upcoming Events</h1>
 
-      {soonestEvent && (
-        <div className="mb-6 p-4 bg-yellow-100 rounded shadow">
-          <h2 className="text-xl font-semibold">⏳ Countdown to Next Event</h2>
-          <Countdown eventTime={soonestEvent.event_time} />
-        </div>
-      )}
+{soonestEvent && (
+  <div className="mb-2 p-4 bg-yellow-100 rounded shadow">
+    <h2 className="text-xl font-semibold mb-4">⏳ Countdown to Next Event</h2>
+    <Countdown eventTime={soonestEvent.event_time} />
+    <div className="mt-4 bg-white rounded-lg shadow p-4">
+      <img src={soonestEvent.image_url} alt={soonestEvent.name} className="w-5/6 h-48 object-cover rounded-md mb-3" />
+      <h3 className="text-xl font-bold">{soonestEvent.name}</h3>
+      <p className="text-gray-500 mb-1">
+        {dayjs(soonestEvent.event_time).format('dddd, MMM D • h:mm A')}
+      </p>
+      <p className="text-gray-700 mb-2">{soonestEvent.description}</p>
+      <p className="mb-2">🧍 RSVP Count: {rsvpCounts[soonestEvent.id] || 0}</p>
+      <button
+        onClick={() => setActiveRSVP(soonestEvent)}
+        disabled={rsvpSubmitted === soonestEvent.id}
+        className={`px-4 py-2 rounded ${
+          rsvpSubmitted === soonestEvent.id ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
+        } text-white`}
+      >
+        {rsvpSubmitted === soonestEvent.id ? 'RSVPed!' : 'RSVP'}
+      </button>
+    </div>
+  </div>
+)}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {events.map(event => (
-          <div key={event.id} className="bg-white rounded-lg shadow p-4">
-            <img src={event.image_url} alt={event.name} className="w-full h-48 object-cover rounded-md mb-3" />
-            <h3 className="text-xl font-bold">{event.name}</h3>
-            <p className="text-gray-500 mb-2">{dayjs(event.event_time).format('dddd, MMM D • h:mm A')}</p>
-            <p className="mb-2">🧍 RSVP Count: {rsvpCounts[event.id] || 0}</p>
-            <button
-              onClick={() => setActiveRSVP(event)}
-              disabled={rsvpSubmitted === event.id}
-              className={`px-4 py-2 rounded ${
-                rsvpSubmitted === event.id ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
-              } text-white`}
-            >
-              {rsvpSubmitted === event.id ? 'RSVPed!' : 'RSVP'}
-            </button>
-          </div>
-        ))}
-      </div>
+
+     {events.length > 0 && (
+  <>
+    {/* Upcoming Events */}
+    <h2 className="text-2xl font-semibold mt-8 mb-4">🟢 Upcoming Events</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {upcomingEvents.filter(e => dayjs(e.event_time).isAfter(dayjs())).map(event => (
+        <div key={event.id} className="bg-white rounded-lg shadow p-4">
+          <img src={event.image_url} alt={event.name} className="w-5/6 h-48 object-cover rounded-md mb-3" />
+          <h3 className="text-xl font-bold">{event.name}</h3>
+          <p className="text-gray-500 mb-1">{dayjs(event.event_time).format('dddd, MMM D • h:mm A')}</p>
+          <p className="text-gray-700 mb-2">{event.description}</p>
+          <p className="mb-2">🧍 RSVP Count: {rsvpCounts[event.id] || 0}</p>
+          <button
+            onClick={() => setActiveRSVP(event)}
+            disabled={rsvpSubmitted === event.id}
+            className={`px-4 py-2 rounded ${
+              rsvpSubmitted === event.id ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'
+            } text-white`}
+          >
+            {rsvpSubmitted === event.id ? 'RSVPed!' : 'RSVP'}
+          </button>
+        </div>
+      ))}
+    </div>
+
+    {/* Past Events */}
+    <h2 className="text-2xl font-semibold mt-12 mb-4 text-gray-600">🔚 Past Events</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-70">
+      {events.filter(e => dayjs(e.event_time).isBefore(dayjs())).map(event => (
+        <div key={event.id} className="bg-white rounded-lg shadow p-4">
+          <img src={event.image_url} alt={event.name} className="w-full h-48 object-cover rounded-md mb-3" />
+          <h3 className="text-xl font-bold">{event.name}</h3>
+          <p className="text-gray-500 mb-1">{dayjs(event.event_time).format('dddd, MMM D • h:mm A')}</p>
+          <p className="text-gray-700 mb-2">{event.description}</p>
+          <p className="mb-2">🧍 Total RSVPs: {rsvpCounts[event.id] || 0}</p>
+          <button
+            disabled
+            className="px-4 py-2 rounded bg-gray-300 text-white cursor-not-allowed"
+          >
+            Event Ended
+          </button>
+        </div>
+      ))}
+    </div>
+  </>
+)}
 
       {activeRSVP && (
         <RSVPModal
@@ -158,6 +210,7 @@ export default function Events() {
           onSubmit={handleRSVPSubmit}
         />
       )}
+    </div>
     </div>
   );
 }
